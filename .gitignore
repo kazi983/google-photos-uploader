@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Google OAuth credentials
+client_secret.json
+token.json
+
+# Environment / secrets
+.env
+.env.*
+
+# Local logs
+*.log
+
+# OS/editor files
+.DS_Store
