@@ -4,7 +4,7 @@ set -euo pipefail
 
 WATCH_DIR="$HOME/Pictures/GooglePhotos/upload"
 UPLOADED_DIR="$HOME/Pictures/GooglePhotos/uploaded"
-PROJECT_DIR="$HOME/bin/google-photos-uploader"
+PROJECT_DIR="$HOME/src/google-photos-uploader"
 
 mkdir -p "$WATCH_DIR"
 mkdir -p "$UPLOADED_DIR"
