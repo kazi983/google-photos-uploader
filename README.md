@@ -2,9 +2,19 @@
 
 Automatically upload screenshots from Ubuntu to Google Photos.
 
-The application watches a local folder using Linux `inotify`. When a new PNG screenshot is detected, it reads the file's creation time, embeds it as EXIF metadata with the correct timezone, uploads the image to Google Photos, and moves the successfully uploaded file to a separate folder.
+## Why
+
+Google Photos has no official desktop sync client for Linux, so screenshots taken on Ubuntu had to be uploaded by hand — and uploaded PNGs ended up sorted by upload date instead of when they were taken. This tool makes it hands-off: save a screenshot, and it appears in Google Photos at the right point in the timeline.
+
+## Highlights
+
+* **Event-driven:** watches the folder with Linux `inotify` instead of polling, and starts automatically at login.
+* **Least privilege:** uses only the `photoslibrary.appendonly` OAuth scope — it can add photos but never read or delete them.
+* **Correct timeline:** embeds the file's creation time (with timezone) as EXIF metadata on a temporary copy, leaving the original untouched.
 
 ## How It Works
+
+The application watches a local folder using Linux `inotify`. When a new PNG screenshot is detected, it reads the file's creation time, embeds it as EXIF metadata with the correct timezone, uploads the image to Google Photos, and moves the successfully uploaded file to a separate folder.
 
 ```text
 Screenshot
@@ -38,9 +48,12 @@ The original screenshot is not modified. A temporary copy is created for adding 
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd google-photos-uploader
+mkdir -p ~/src
+git clone https://github.com/kazi983/google-photos-uploader.git ~/src/google-photos-uploader
+cd ~/src/google-photos-uploader
 ```
+
+`watch.sh` expects the repository at `~/src/google-photos-uploader`. If you clone it elsewhere, update `PROJECT_DIR` in `watch.sh`.
 
 ### 2. Create a Python virtual environment
 
@@ -52,11 +65,7 @@ source .venv/bin/activate
 ### 3. Install Python dependencies
 
 ```bash
-pip install google-auth-oauthlib
-pip install google-auth-httplib2
-pip install google-api-python-client
-pip install requests
-pip install Pillow
+pip install -r requirements.txt
 ```
 
 ### 4. Install `inotify-tools`
@@ -134,7 +143,7 @@ Successfully uploaded screenshots will be moved to:
 Make the watcher executable:
 
 ```bash
-chmod +x ~/bin/google-photos-uploader/watch.sh
+chmod +x ~/src/google-photos-uploader/watch.sh
 ```
 
 If the repository is located somewhere else, adjust the path accordingly.
@@ -160,7 +169,7 @@ Add:
 Type=Application
 Name=Google Photos Uploader
 Comment=Automatically upload screenshots to Google Photos
-Exec=/home/USERNAME/bin/google-photos-uploader/watch.sh
+Exec=/home/USERNAME/src/google-photos-uploader/watch.sh
 Terminal=false
 X-GNOME-Autostart-enabled=true
 ```
@@ -178,6 +187,11 @@ google-photos-uploader/
 ├── auth.py
 ├── upload.py
 ├── watch.sh
+├── requirements.txt
+├── docs/
+│   └── 2026-10-19_autostart-and-oauth-incident.md
+├── PRIVACY.md
+├── LICENSE
 ├── README.md
 └── .gitignore
 ```
@@ -198,6 +212,16 @@ Screenshot directories:
 └── uploaded/
 ```
 
+## Troubleshooting
+
+If screenshots stay in the `upload` folder, check the watcher's log:
+
+```bash
+journalctl --user -b | grep -i google-photos
+```
+
+See the [incident report](docs/2026-10-19_autostart-and-oauth-incident.md) for a real case: uploads failed silently for over a month because the OAuth consent screen was left in **Testing** status, where refresh tokens expire after 7 days. Publish the consent screen to **Production** before relying on the uploader long-term.
+
 ## Limitations
 
 * Currently supports PNG screenshots.
@@ -206,3 +230,7 @@ Screenshot directories:
 * Requires the Google Photos API.
 * The screenshot file must have an available filesystem `Birth` timestamp.
 * Screenshots must be saved to the configured `upload` directory.
+
+## License
+
+[MIT](LICENSE)

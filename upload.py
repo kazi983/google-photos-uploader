@@ -1,15 +1,13 @@
+import subprocess
+import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
-import shutil
-import subprocess
-import tempfile
-import sys
 
 import requests
-from PIL import Image
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-
+from PIL import Image
 
 TOKEN_FILE = (
     Path.home()
@@ -160,7 +158,7 @@ def main():
     if len(sys.argv) != 2:
         raise SystemExit(
             f"Usage: {sys.argv[0]} <image>"
-	)
+        )
 
     image_file = Path(sys.argv[1]).expanduser()
 
